@@ -1,0 +1,28 @@
+# Assumes an nginx-ingress controller and cert-manager are already installed
+# in the cluster — adjust ingressClassName/annotations for your provider
+# (ALB on EKS, GCE on GKE, etc.) if different.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: estatecore-api
+  namespace: estatecore
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: '100'
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.estatecore.app
+      secretName: estatecore-api-tls
+  rules:
+    - host: api.estatecore.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: estatecore-api
+                port:
+                  number: 80

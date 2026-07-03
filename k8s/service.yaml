@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: estatecore-api
+  namespace: estatecore
+spec:
+  selector:
+    app: estatecore-api
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: estatecore-api-config
+  namespace: estatecore
+data:
+  NODE_ENV: 'production'
+  PORT: '3000'
+  DATABASE_POOL_MAX: '10'
+  JWT_ISSUER: 'https://auth.estatecore.app'
+  DEFAULT_VAT_PERCENT: '7.5'

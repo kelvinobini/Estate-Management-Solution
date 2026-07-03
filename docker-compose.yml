@@ -1,0 +1,52 @@
+name: estatecore
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: estatecore
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: estatecore
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Runs automatically on first container start (official Postgres image convention) — not on every restart.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U estatecore -d estatecore']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    env_file:
+      # Generate with: node scripts/generate-dev-secrets.js (creates this file from .env.example)
+      - ./apps/api/.env
+    environment:
+      # Overrides .env so the container reaches the compose network's service names, not localhost.
+      DATABASE_URL: postgres://estatecore:password@postgres:5432/estatecore
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

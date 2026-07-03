@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment / secrets — never commit real values, only .env.example
+.env
+.env.*
+!.env.example
+k8s/secret.yaml
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Claude Code — settings.json (per mobile app scaffold) is shared/committed,
+# settings.local.json is a personal environment override, never committed.
+.claude/settings.local.json

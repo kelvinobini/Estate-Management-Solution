@@ -1,0 +1,51 @@
+# Postgres/Redis are deliberately NOT run in this cluster — see k8s/README.md.
+# In production, point DATABASE_URL/REDIS_URL (in secret.yaml) at managed
+# services (RDS/Cloud SQL, ElastiCache/Memorystore) instead.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: estatecore-api
+  namespace: estatecore
+  labels:
+    app: estatecore-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: estatecore-api
+  template:
+    metadata:
+      labels:
+        app: estatecore-api
+    spec:
+      containers:
+        - name: api
+          image: estatecore-api:latest # replace with your registry's tag, e.g. ghcr.io/yourorg/estatecore-api:sha-abcdef
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: estatecore-api-config
+            - secretRef:
+                name: estatecore-api-secrets
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: '250m'
+              memory: '256Mi'
+            limits:
+              cpu: '1'
+              memory: '512Mi'
